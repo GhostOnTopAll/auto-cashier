@@ -1,47 +1,40 @@
-its an automatic cashier like program that I made for my project
-the project is about a virtual future mall
-that contains PYTHON CODE, HTML, DATA ANLI. , DIGITAL ART , Machine Learning, and an Embedded System 
-and thats part 1 (python code)
-and here is the python code to copy and edit
+Automatic cashier (Ghost Shoppings) — Flask web API version.
 
-Productnames = ["raw chicken", "raw beef", "ham", "carrots", "milk"]
-Prices = [200, 225, 150, 45, 30]
+This is part of a larger virtual future mall project that spans Python, HTML,
+data analytics, machine learning, and an embedded system. This repo covers
+part 1: the Python cashier logic, now exposed as a stateless Flask API so it
+can run on Railway without needing an interactive terminal.
 
-print("Welcome to Ghost Shoppings")
-print("Here is our available menu:")
-for i in range(5):
-    print(f"{Productnames[i]}: {Prices[i]}")
+## Why a web API instead of a CLI?
 
-receipt_total = 0
-decor1 = "_" * 15
-decor2 = "=" * 20
-discount_rate = 0.10
+The original version used `input()` in a loop, which works fine locally but
+crashes on Railway with `EOFError: EOF when reading a line` because there is
+no terminal attached to provide input. This version replaces the CLI loop
+with Flask routes — every request is independent and returns JSON.
 
+## Endpoints
 
-def generate_receipt(total_amount):
-    print(decor2)
-    print("Ghost Shoppings")
-    print(decor1)
-    if total_amount > 500:
-        final_total = total_amount - (total_amount * discount_rate)
-        print("Discount = 10%")
-        print(f"Final Total = {final_total} EGP")
-    else:
-        print("Discount = 0%")
-        print(f"Final Total = {total_amount} EGP")
-    print("Thank you for shopping with us!\n")
+- `GET /` — welcome message and available menu
+- `GET /cart` — view current cart and total
+- `POST /cart` — add a product to the cart, body: `{"product": "milk"}`
+- `DELETE /cart` — clear the cart
+- `POST /checkout` — finalize the order, apply the 10% discount if the total
+  is over 500 EGP, and return a receipt
 
+## Business logic
 
-while True:
-    product = input("\nPlease, enter the product name (or 'finish' to receive receipt):\n").lower().strip()
+- Products: raw chicken (200), raw beef (225), ham (150), carrots (45),
+  milk (30)
+- 10% discount applied automatically when the cart total exceeds 500 EGP
+- Receipt formatting is preserved from the original CLI version
 
-    if product == 'finish':
-        generate_receipt(receipt_total)
-        break
+## Running locally
 
-    elif product in Productnames:
-        receipt_total += Prices[Productnames.index(product)]
-        print(f"{product} added! Current total: {receipt_total} EGP")
+```
+pip install -r requirements.txt
+python GhostShoppings.py
+```
 
-    else:
-        print("Product not found. Please check the spelling and try again.")
+The app listens on the port defined by the `PORT` environment variable
+(defaults to `5000`), which is how Railway assigns and exposes a public
+domain for the service.
